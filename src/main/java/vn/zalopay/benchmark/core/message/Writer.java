@@ -1,5 +1,6 @@
 package vn.zalopay.benchmark.core.message;
 
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
@@ -17,16 +18,18 @@ public class Writer<T extends Message> implements StreamObserver<T> {
 
     private final JsonFormat.Printer jsonPrinter;
     private final GrpcResponse grpcResponse;
+    private final Descriptors.MethodDescriptor methodDescriptor;
 
-    Writer(JsonFormat.Printer jsonPrinter, GrpcResponse grpcResponse) {
+    Writer(JsonFormat.Printer jsonPrinter, GrpcResponse grpcResponse, Descriptors.MethodDescriptor methodDescriptor) {
         this.jsonPrinter = jsonPrinter.preservingProtoFieldNames().includingDefaultValueFields();
         this.grpcResponse = grpcResponse;
+        this.methodDescriptor = methodDescriptor;
     }
 
     /** Creates a new Writer which writes the messages it sees to the supplied Output. */
     public static <T extends Message> Writer<T> create(
-            GrpcResponse grpcResponse, JsonFormat.TypeRegistry registry) {
-        return new Writer<>(JsonFormat.printer().usingTypeRegistry(registry), grpcResponse);
+            GrpcResponse grpcResponse, JsonFormat.TypeRegistry registry, Descriptors.MethodDescriptor methodDescriptor) {
+        return new Writer<>(JsonFormat.printer().usingTypeRegistry(registry), grpcResponse, methodDescriptor);
     }
 
     @Override
@@ -37,7 +40,7 @@ public class Writer<T extends Message> implements StreamObserver<T> {
     @Override
     public void onError(Throwable throwable) {
         grpcResponse.setSuccess(false);
-        grpcResponse.setThrowable(throwable);
+        grpcResponse.setThrowable(throwable, methodDescriptor);
     }
 
     @Override

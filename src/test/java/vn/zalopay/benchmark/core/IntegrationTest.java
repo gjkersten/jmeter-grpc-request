@@ -19,6 +19,7 @@ import org.apache.jmeter.threads.ThreadGroup;
 import org.apache.jmeter.threads.gui.ThreadGroupGui;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.collections.HashTree;
+import org.apache.jorphan.collections.ListedHashTree;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
@@ -46,7 +47,7 @@ public class IntegrationTest extends BaseTest {
         JMeterUtils.setProperty("DEBUG", "true");
         StandardJMeterEngine jmeter = new StandardJMeterEngine();
         // JMeter Test Plan, basically JOrphan HashTree
-        HashTree testPlanTree = new HashTree();
+        ListedHashTree root = new ListedHashTree();
         // Loop Controller
         LoopController loopController = new LoopController();
         loopController.setLoops(2);
@@ -69,21 +70,22 @@ public class IntegrationTest extends BaseTest {
         testPlan.setUserDefinedVariables((Arguments) new ArgumentsPanel().createTestElement());
 
         // Construct Test Plan from previously initialized elements
-        testPlanTree.add(testPlan);
-        HashTree threadGroupHashTree = testPlanTree.add(testPlan, threadGroup);
+        ListedHashTree testPlanSubTree = root.add(testPlan);
+        ListedHashTree threadGroupHashTree = testPlanSubTree.add(threadGroup);
         threadGroupHashTree.add(createGrpcSampler());
 
         SaveService.saveTree(
-                testPlanTree,
+                root,
                 new FileOutputStream(
                         Paths.get(TEMP_JMETER_HOME.toString(), "IntegrationTest.jmx").toString()));
+
         // add Summarizer output to get test progress in stdout like:
         // Store execution results into a .jtl file
         IntegrationTestResultCollector testResult = new IntegrationTestResultCollector();
-        testPlanTree.add(testPlanTree.getArray()[0], new Object[] {testResult});
+        testPlanSubTree.add(testResult);
 
         // Run Test Plan
-        jmeter.configure(testPlanTree);
+        jmeter.configure(root);
         jmeter.run();
         jmeter.askThreadsToStop();
         jmeter.stopTest();

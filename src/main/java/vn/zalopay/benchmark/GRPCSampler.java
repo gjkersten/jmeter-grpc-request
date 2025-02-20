@@ -1,8 +1,11 @@
 package vn.zalopay.benchmark;
 
+import io.grpc.Metadata;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
@@ -140,6 +143,7 @@ public class GRPCSampler extends AbstractSampler implements ThreadListener, Test
     }
 
     private void generateErrorResultInInitGRPCRequest(SampleResult sampleResult, Exception e) {
+        log.error(ExceptionUtils.getPrintExceptionToStr(e, null), "UTF-8");
         sampleResult.setSuccessful(false);
         sampleResult.setResponseCode(" 400");
         sampleResult.setDataType(SampleResult.TEXT);
@@ -168,26 +172,32 @@ public class GRPCSampler extends AbstractSampler implements ThreadListener, Test
 
     private void generateErrorResult(GrpcResponse grpcResponse, SampleResult sampleResult) {
         Throwable throwable = grpcResponse.getThrowable();
+        log.error(ExceptionUtils.getPrintExceptionToStr(throwable, null), "UTF-8");
         sampleResult.setSuccessful(false);
         sampleResult.setResponseCode(" 500");
         boolean isRuntimeException = throwable instanceof StatusRuntimeException;
         if (isRuntimeException) {
-            generateStatusRuntimeExceptionResponseData(sampleResult, throwable);
+            generateStatusRuntimeExceptionResponseData(sampleResult, (StatusRuntimeException)throwable, grpcResponse);
         } else {
             generateExceptionInInvokeSendGrpcResponseData(sampleResult, throwable);
+        }
+
+        if (clientCaller != null) {
+            clientCaller.shutdownNettyChannel();
+            clientCaller = null;
         }
     }
 
     private void generateStatusRuntimeExceptionResponseData(
-            SampleResult sampleResult, Throwable throwable) {
+            SampleResult sampleResult, StatusRuntimeException statusRuntimeException, GrpcResponse grpcResponse) {
         String responseMessage = " ";
         String responseData = "";
-        Status status = ((StatusRuntimeException) throwable).getStatus();
+        Status status = statusRuntimeException.getStatus();
         Status.Code code = status.getCode();
         responseMessage += code.value() + " " + code.name();
         responseData = status.getDescription();
         sampleResult.setResponseMessage(responseMessage);
-        sampleResult.setResponseData(responseData, "UTF-8");
+        sampleResult.setResponseData(responseData + "\n" + grpcResponse.getGrpcMessageString(), "UTF-8");
     }
 
     private void generateExceptionInInvokeSendGrpcResponseData(
@@ -336,5 +346,11 @@ public class GRPCSampler extends AbstractSampler implements ThreadListener, Test
     public void testEnded(String s) {
         log.info("testEnded {}", s);
         ProtocInvoker.cleanTempFolderForGeneratingProtoc();
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        clientCaller.shutdownNettyChannel();
+        log.debug("closed channel");
+        out.defaultWriteObject();
     }
 }

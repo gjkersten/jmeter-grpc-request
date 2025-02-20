@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Create JMeter Script From Java Code">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Example Thread Group">
+        <intProp name="ThreadGroup.num_threads">50</intProp>
+        <intProp name="ThreadGroup.ramp_time">0</intProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController">
+          <intProp name="LoopController.loops">2</intProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <vn.zalopay.benchmark.GRPCSampler>
+          <stringProp name="TestPlan.comments">dummyComment</stringProp>
+          <stringProp name="GRPCSampler.protoFolder">/Users/gjkersten/Development/workspace/external/jmeter-grpc-request/dist/benchmark/grpc-server/src/main/resources/protos-v2</stringProp>
+          <stringProp name="GRPCSampler.libFolder">/Users/gjkersten/Development/workspace/external/jmeter-grpc-request/dist/benchmark/grpc-server/src/main/resources/libs</stringProp>
+          <stringProp name="GRPCSampler.metadata"></stringProp>
+          <stringProp name="GRPCSampler.host">localhost</stringProp>
+          <stringProp name="GRPCSampler.port">8005</stringProp>
+          <stringProp name="GRPCSampler.fullMethod">bookstore.Bookstore/CreateShelf</stringProp>
+          <stringProp name="GRPCSampler.deadline">2000</stringProp>
+          <boolProp name="GRPCSampler.tls">false</boolProp>
+          <boolProp name="GRPCSampler.tlsDisableVerification">false</boolProp>
+          <stringProp name="GRPCSampler.requestJson">{&quot;shelf&quot;:{&quot;id&quot;:1599156420811,&quot;theme&quot;:&quot;Hello server!!&quot;}}</stringProp>
+        </vn.zalopay.benchmark.GRPCSampler>
+        <hashTree/>
+      </hashTree>
+      <vn.zalopay.benchmark.core.IntegrationTest_-IntegrationTestResultCollector/>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

@@ -1,6 +1,7 @@
 package vn.zalopay.benchmark.core.sampler;
 
 import com.google.common.net.HostAndPort;
+import com.google.protobuf.Descriptors;
 import com.google.protobuf.util.JsonFormat;
 
 import org.apache.jmeter.samplers.SampleResult;
@@ -43,6 +44,7 @@ public class GrpcSamplerTest extends BaseTest {
                 String.format(
                         "Actual: [%s] %n Expected: [%s]",
                         responseData, "\"theme\": \"Hello server"));
+        grpcSampler.threadFinished();
     }
 
     @Test
@@ -87,6 +89,7 @@ public class GrpcSamplerTest extends BaseTest {
                 String.format(
                         "Actual: [%s] %n Expected: [%s]",
                         responseData3, "\"theme\": \"Hello server"));
+        grpcSampler.threadFinished();
     }
 
     @Test
@@ -114,6 +117,7 @@ public class GrpcSamplerTest extends BaseTest {
                 String.format(
                         "Actual: [%s] %n Expected: [%s]",
                         responseData, "\"theme\": \"Hello server"));
+        grpcSampler.threadFinished();
     }
 
     @Test
@@ -141,6 +145,7 @@ public class GrpcSamplerTest extends BaseTest {
                 String.format(
                         "Actual: [%s] %n Expected: [%s]",
                         sampleResult.getResponseMessage(), "4 DEADLINE_EXCEEDED"));
+        grpcSampler.threadFinished();
     }
 
     @Test
@@ -156,7 +161,8 @@ public class GrpcSamplerTest extends BaseTest {
                         () ->
                                 Writer.create(
                                         Mockito.any(GrpcResponse.class),
-                                        Mockito.any(JsonFormat.TypeRegistry.class)))
+                                        Mockito.any(JsonFormat.TypeRegistry.class),
+                                        Mockito.any(Descriptors.MethodDescriptor.class)))
                 .thenAnswer((i) -> writer);
         HostAndPort hostAndPort = HostAndPort.fromString(HOST_PORT);
         GRPCSampler grpcSampler = new GRPCSampler();
@@ -182,6 +188,7 @@ public class GrpcSamplerTest extends BaseTest {
                 String.format(
                         "Actual: [%s] %n Expected: [%s]",
                         responseData, " The stack trace is null"));
+        grpcSampler.threadFinished();
     }
 
     @Test
@@ -215,6 +222,7 @@ public class GrpcSamplerTest extends BaseTest {
                         responseData,
                         "java.lang.RuntimeException: Unable to resolve service by invoking"
                                 + " protoc:"));
+        grpcSampler.threadFinished();
     }
 
     @Test
@@ -244,6 +252,7 @@ public class GrpcSamplerTest extends BaseTest {
                 String.format(
                         "Actual: [%s] %n Expected: [%s]",
                         responseData, "Unable to find method Invalid in service Bookstore"));
+        grpcSampler.threadFinished();
     }
 
     @Test
@@ -274,6 +283,7 @@ public class GrpcSamplerTest extends BaseTest {
                 String.format(
                         "Actual: [%s] %n Expected: [%s]",
                         responseData, "\"theme\": \"Hello server"));
+        grpcSampler.threadFinished();
     }
 
     @Test
@@ -304,5 +314,6 @@ public class GrpcSamplerTest extends BaseTest {
                 responseData.contains(EXPECTED_RESPONSE_DATA),
                 String.format(
                         "Actual: [%s] %n Expected: [%s]", responseData, EXPECTED_RESPONSE_DATA));
+        grpcSampler.threadFinished();
     }
 }

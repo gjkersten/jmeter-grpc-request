@@ -1,5 +1,7 @@
 package vn.zalopay.benchmark.core.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -25,7 +27,7 @@ public class ExceptionUtilsTest extends BaseTest {
             protocInvoker.invoke();
         } catch (Exception e) {
             String expectedMsg =
-                    "\tat org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:677)\n";
+                    "\tat org.testng.internal.invokers.TestInvoker.invokeMethod(TestInvoker.java:686)\n";
             String exceptionMsg = ExceptionUtils.getPrintExceptionToStr(e, 10);
             Assert.assertTrue(
                     exceptionMsg.contains(expectedMsg),
@@ -40,7 +42,7 @@ public class ExceptionUtilsTest extends BaseTest {
                     ProtocInvoker.forConfig(JMETER_PROPERTIES_FILE.toAbsolutePath().toString(), "");
             protocInvoker.invoke();
         } catch (Exception e) {
-            String expectedMsg = "\tat org.testng.TestNG.run(TestNG.java:1067)\n";
+            String expectedMsg = "\tat org.testng.TestNG.run(TestNG.java:1079)\n";
             String exceptionMsg = ExceptionUtils.getPrintExceptionToStr(e, 100);
             Assert.assertTrue(
                     exceptionMsg.contains(expectedMsg),

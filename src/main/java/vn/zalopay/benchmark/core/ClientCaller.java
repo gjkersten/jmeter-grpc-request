@@ -192,7 +192,7 @@ public class ClientCaller {
         long deadline = parsingDeadlineTime(deadlineMs);
         GrpcResponse grpcResponse = new GrpcResponse();
         StreamObserver<DynamicMessage> streamObserver =
-                ComponentObserver.of(Writer.create(grpcResponse, registry));
+                ComponentObserver.of(Writer.create(grpcResponse, registry, methodDescriptor));
         try {
             dynamicClient
                     .blockingUnaryCall(requestMessages, streamObserver, callOptions(deadline))
@@ -205,7 +205,7 @@ public class ClientCaller {
             } else {
                 ex = e;
             }
-            grpcResponse.setThrowable(ex);
+            grpcResponse.setThrowable(ex, methodDescriptor);
             shutdownNettyChannel();
         }
 
@@ -216,12 +216,13 @@ public class ClientCaller {
         long deadline = parsingDeadlineTime(deadlineMs);
         GrpcResponse grpcResponse = new GrpcResponse();
         StreamObserver<DynamicMessage> streamObserver =
-                ComponentObserver.of(Writer.create(grpcResponse, registry));
+                ComponentObserver.of(Writer.create(grpcResponse, registry, methodDescriptor));
         try {
             dynamicClient
                     .callServerStreaming(requestMessages, streamObserver, callOptions(deadline))
                     .get();
         } catch (Exception e) {
+            grpcResponse.setThrowable(e.getCause(), methodDescriptor);
             shutdownNettyChannel();
         }
 
@@ -232,12 +233,13 @@ public class ClientCaller {
         long deadline = parsingDeadlineTime(deadlineMs);
         GrpcResponse output = new GrpcResponse();
         StreamObserver<DynamicMessage> streamObserver =
-                ComponentObserver.of(Writer.create(output, registry));
+                ComponentObserver.of(Writer.create(output, registry, methodDescriptor));
         try {
             dynamicClient
                     .callClientStreaming(requestMessages, streamObserver, callOptions(deadline))
                     .get();
         } catch (Exception e) {
+            output.setThrowable(e, methodDescriptor);
             shutdownNettyChannel();
             throw new RuntimeException(
                     String.format(
@@ -252,12 +254,13 @@ public class ClientCaller {
         long deadline = parsingDeadlineTime(deadlineMs);
         GrpcResponse output = new GrpcResponse();
         StreamObserver<DynamicMessage> streamObserver =
-                ComponentObserver.of(Writer.create(output, registry));
+                ComponentObserver.of(Writer.create(output, registry, methodDescriptor));
         try {
             dynamicClient
                     .callBidiStreaming(requestMessages, streamObserver, callOptions(deadline))
                     .get();
         } catch (Exception e) {
+            output.setThrowable(e, methodDescriptor);
             shutdownNettyChannel();
             throw new RuntimeException(
                     String.format(
